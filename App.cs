@@ -6,6 +6,7 @@ using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Windows.Media.Imaging;
 
@@ -53,6 +54,58 @@ namespace RAB_Session_06_Challenge
             // add using statement for System.Windows.Media.Imaging
 
             // 4. Add images to button data
+            data1.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Blue_32);
+            data1.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Blue_16);
+            data2.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Red_32);
+            data2.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Red_16);
+            data3.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Green_32);
+            data3.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Green_16);
+            data4.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Red_32);
+            data4.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Red_16);
+            data5.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Blue_32);
+            data5.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Blue_16);
+            data6.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Blue_32);
+            data6.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Blue_16);
+            data7.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Red_32);
+            data7.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Red_16);
+            data8.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Green_32);
+            data8.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Green_16);
+            data9.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Red_32);
+            data9.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Red_16);
+            data10.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Blue_32);
+            data10.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Blue_16);
+
+            pulldownData1.LargeImage = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Red_32);
+            pulldownData1.Image = BitmapToImageSource(RAB_Session_06_Challenge.Properties.Resources.Red_16);
+
+            // 5. Add tooltips
+            data1.ToolTip = "Tool 1 tool tip";
+            data2.ToolTip = "Tool 2 tool tip";
+            data3.ToolTip = "Tool 3 tool tip";
+            data4.ToolTip = "Tool 4 tool tip";
+            data5.ToolTip = "Tool 5 tool tip";
+            data6.ToolTip = "Tool 6 tool tip";
+            data7.ToolTip = "Tool 7 tool tip";
+            data8.ToolTip = "Tool 8 tool tip";
+            data9.ToolTip = "Tool 9 tool tip";
+            data10.ToolTip = "Tool 10 tool tip";
+
+            // 6. Create buttons
+            PushButton button1 = panel.AddItem(data1) as PushButton;
+            PushButton button2 = panel.AddItem(data2) as PushButton;
+
+            panel.AddStackedItems(data3, data4, data5);
+
+            SplitButton split = panel.AddItem(splitData1) as SplitButton;
+            split.AddPushButton(data6);
+            split.AddPushButton(data7);
+
+            PulldownButton pulldown = panel.AddItem(pulldownData1) as PulldownButton;
+            pulldown.AddPushButton(data8);
+            pulldown.AddPushButton(data9);
+            pulldown.AddPushButton(data10);
+
+            // 7. Edit .addin file
 
             return Result.Succeeded;
         }
@@ -81,6 +134,21 @@ namespace RAB_Session_06_Challenge
             }
 
             return null;
+        }
+        private BitmapImage BitmapToImageSource(System.Drawing.Bitmap bm)
+        {
+            using (MemoryStream mem = new MemoryStream())
+            {
+                bm.Save(mem, System.Drawing.Imaging.ImageFormat.Png);
+                mem.Position = 0;
+                BitmapImage bmi = new BitmapImage();
+                bmi.BeginInit();
+                bmi.StreamSource = mem;
+                bmi.CacheOption = BitmapCacheOption.OnLoad;
+                bmi.EndInit();
+
+                return bmi;
+            }
         }
 
         public Result OnShutdown(UIControlledApplication app)
