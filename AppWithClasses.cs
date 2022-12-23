@@ -6,10 +6,12 @@ using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Windows.Interop;
+using System.Windows;
 using System.Windows.Media.Imaging;
-
 #endregion
 
 namespace RAB_Session_06_Challenge
@@ -35,7 +37,7 @@ namespace RAB_Session_06_Challenge
             RibbonPanel panel = CreateRibbonPanel(app, "Revit Add-in Bootcamp", "Revit Tools");
 
             // 3. Create button data instances
-            ButtonClass data1 = new ButtonClass("Tool1", "Tool 1", "RAB_Session_06_Challenge.Command",
+            ButtonClass data1 = new ButtonClass("Tool1", "Tool 1", "SmartPack_Shared.AdskCmdAlign",
                 RAB_Session_06_Challenge.Properties.Resources.Blue_32,
                 RAB_Session_06_Challenge.Properties.Resources.Blue_16, "This is tool 1 tooltip");
             ButtonClass data2 = new ButtonClass("Tool2", "Tool 2", "RAB_Session_06_Challenge.Command",
@@ -146,6 +148,10 @@ namespace RAB_Session_06_Challenge
     public class ButtonClass
     {
         public PushButtonData Data { get; set; }
+        string blue32 = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAFSmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjMyIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMzIiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSIzMiIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMzIiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249Ijk2LjAiCiAgIHRpZmY6WVJlc29sdXRpb249Ijk2LjAiCiAgIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiCiAgIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIKICAgeG1wOk1vZGlmeURhdGU9IjIwMjItMDgtMDNUMTE6MDA6NDUtMDQ6MDAiCiAgIHhtcDpNZXRhZGF0YURhdGU9IjIwMjItMDgtMDNUMTE6MDA6NDUtMDQ6MDAiPgogICA8ZGM6dGl0bGU+CiAgICA8cmRmOkFsdD4KICAgICA8cmRmOmxpIHhtbDpsYW5nPSJ4LWRlZmF1bHQiPkljb25zPC9yZGY6bGk+CiAgICA8L3JkZjpBbHQ+CiAgIDwvZGM6dGl0bGU+CiAgIDx4bXBNTTpIaXN0b3J5PgogICAgPHJkZjpTZXE+CiAgICAgPHJkZjpsaQogICAgICBzdEV2dDphY3Rpb249InByb2R1Y2VkIgogICAgICBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZmZpbml0eSBQaG90byAxLjkuMiIKICAgICAgc3RFdnQ6d2hlbj0iMjAyMi0wOC0wM1QxMTowMDo0NS0wNDowMCIvPgogICAgPC9yZGY6U2VxPgogICA8L3htcE1NOkhpc3Rvcnk+CiAgPC9yZGY6RGVzY3JpcHRpb24+CiA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSJyIj8+pNjWXwAAAYFpQ0NQc1JHQiBJRUM2MTk2Ni0yLjEAACiRdZG7SwNBEIe/JIriG7SwsAiiqRKJClEbiwSNglokEYzaJJeXkMdxF5FgK9gGFEQbX4X+BdoK1oKgKIJYirWijYZzLhEiYmaZnW9/uzPszoI1lFYyep0bMtm8FvB77QvhRXvDM43YaGMER0TR1dngZIia9nGHxYw3LrNW7XP/WnMsritgaRQeV1QtLzwlPLOWV03eFu5SUpGY8KmwU5MLCt+aerTCLyYnK/xlshYK+MDaIWxP/uLoL1ZSWkZYXk5fJr2q/NzHfElLPDsflNgr3oNOAD9e7EwzgQ8Pg4zJ7MHFEAOyoka+u5w/R05yFZlVCmiskCRFHqeoq1I9LjEhelxGmoLZ/7991RPDQ5XqLV6ofzKMt35o2IJS0TA+Dw2jdAS2R7jIVvNzBzD6LnqxqvXtQ/sGnF1WtegOnG9C94Ma0SJlySZuTSTg9QRaw9B5DU1LlZ797HN8D6F1+aor2N0Dh5xvX/4Gl2ln/HOw8/IAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAA/SURBVEiJ7dahDQAwEEJRaLr/ytRdcgNgmo9C8SxOomqqQJI7vbBvSaewuwIAAAAAAAAAAPALMN/UJcDt+/4AUBENNtB9IZ4AAAAASUVORK5CYII=";
+        string green32 = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAFSmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjMyIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMzIiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSIzMiIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMzIiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249Ijk2LjAiCiAgIHRpZmY6WVJlc29sdXRpb249Ijk2LjAiCiAgIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiCiAgIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIKICAgeG1wOk1vZGlmeURhdGU9IjIwMjItMDgtMDNUMTE6MDE6MTUtMDQ6MDAiCiAgIHhtcDpNZXRhZGF0YURhdGU9IjIwMjItMDgtMDNUMTE6MDE6MTUtMDQ6MDAiPgogICA8ZGM6dGl0bGU+CiAgICA8cmRmOkFsdD4KICAgICA8cmRmOmxpIHhtbDpsYW5nPSJ4LWRlZmF1bHQiPkljb25zPC9yZGY6bGk+CiAgICA8L3JkZjpBbHQ+CiAgIDwvZGM6dGl0bGU+CiAgIDx4bXBNTTpIaXN0b3J5PgogICAgPHJkZjpTZXE+CiAgICAgPHJkZjpsaQogICAgICBzdEV2dDphY3Rpb249InByb2R1Y2VkIgogICAgICBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZmZpbml0eSBQaG90byAxLjkuMiIKICAgICAgc3RFdnQ6d2hlbj0iMjAyMi0wOC0wM1QxMTowMToxNS0wNDowMCIvPgogICAgPC9yZGY6U2VxPgogICA8L3htcE1NOkhpc3Rvcnk+CiAgPC9yZGY6RGVzY3JpcHRpb24+CiA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSJyIj8+8OGIawAAAYFpQ0NQc1JHQiBJRUM2MTk2Ni0yLjEAACiRdZG7SwNBEIe/JIriG7SwsAiiqRKJClEbiwSNglokEYzaJJeXkMdxF5FgK9gGFEQbX4X+BdoK1oKgKIJYirWijYZzLhEiYmaZnW9/uzPszoI1lFYyep0bMtm8FvB77QvhRXvDM43YaGMER0TR1dngZIia9nGHxYw3LrNW7XP/WnMsritgaRQeV1QtLzwlPLOWV03eFu5SUpGY8KmwU5MLCt+aerTCLyYnK/xlshYK+MDaIWxP/uLoL1ZSWkZYXk5fJr2q/NzHfElLPDsflNgr3oNOAD9e7EwzgQ8Pg4zJ7MHFEAOyoka+u5w/R05yFZlVCmiskCRFHqeoq1I9LjEhelxGmoLZ/7991RPDQ5XqLV6ofzKMt35o2IJS0TA+Dw2jdAS2R7jIVvNzBzD6LnqxqvXtQ/sGnF1WtegOnG9C94Ma0SJlySZuTSTg9QRaw9B5DU1LlZ797HN8D6F1+aor2N0Dh5xvX/4Gl2ln/HOw8/IAAAAJcEhZcwAADsQAAA7EAZUrDhsAAABCSURBVEiJ7dYhEgAgEEJRVs3e/5x2B4vFvlucTyLxKmFbpSkFbI9bV8+fn1tSy999AwAAAAAAAAAA8AtQfn6j+r4fsXEUKxsy0BIAAAAASUVORK5CYII=";
+        string red32 = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAFSmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjMyIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMzIiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSIzMiIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMzIiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249Ijk2LjAiCiAgIHRpZmY6WVJlc29sdXRpb249Ijk2LjAiCiAgIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiCiAgIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIKICAgeG1wOk1vZGlmeURhdGU9IjIwMjItMDgtMDNUMTE6MDE6MjktMDQ6MDAiCiAgIHhtcDpNZXRhZGF0YURhdGU9IjIwMjItMDgtMDNUMTE6MDE6MjktMDQ6MDAiPgogICA8ZGM6dGl0bGU+CiAgICA8cmRmOkFsdD4KICAgICA8cmRmOmxpIHhtbDpsYW5nPSJ4LWRlZmF1bHQiPkljb25zPC9yZGY6bGk+CiAgICA8L3JkZjpBbHQ+CiAgIDwvZGM6dGl0bGU+CiAgIDx4bXBNTTpIaXN0b3J5PgogICAgPHJkZjpTZXE+CiAgICAgPHJkZjpsaQogICAgICBzdEV2dDphY3Rpb249InByb2R1Y2VkIgogICAgICBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZmZpbml0eSBQaG90byAxLjkuMiIKICAgICAgc3RFdnQ6d2hlbj0iMjAyMi0wOC0wM1QxMTowMToyOS0wNDowMCIvPgogICAgPC9yZGY6U2VxPgogICA8L3htcE1NOkhpc3Rvcnk+CiAgPC9yZGY6RGVzY3JpcHRpb24+CiA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSJyIj8+hYzfmgAAAYFpQ0NQc1JHQiBJRUM2MTk2Ni0yLjEAACiRdZG7SwNBEIe/JIriG7SwsAiiqRKJClEbiwSNglokEYzaJJeXkMdxF5FgK9gGFEQbX4X+BdoK1oKgKIJYirWijYZzLhEiYmaZnW9/uzPszoI1lFYyep0bMtm8FvB77QvhRXvDM43YaGMER0TR1dngZIia9nGHxYw3LrNW7XP/WnMsritgaRQeV1QtLzwlPLOWV03eFu5SUpGY8KmwU5MLCt+aerTCLyYnK/xlshYK+MDaIWxP/uLoL1ZSWkZYXk5fJr2q/NzHfElLPDsflNgr3oNOAD9e7EwzgQ8Pg4zJ7MHFEAOyoka+u5w/R05yFZlVCmiskCRFHqeoq1I9LjEhelxGmoLZ/7991RPDQ5XqLV6ofzKMt35o2IJS0TA+Dw2jdAS2R7jIVvNzBzD6LnqxqvXtQ/sGnF1WtegOnG9C94Ma0SJlySZuTSTg9QRaw9B5DU1LlZ797HN8D6F1+aor2N0Dh5xvX/4Gl2ln/HOw8/IAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAA/SURBVEiJ7dahEQAwEAJByKT/lol58wVgModCsRYnUTVVIMmdVli3JOkUllcAAAAAAAAAAAB+Aeabuga4fd8fUhMNNmro7pAAAAAASUVORK5CYII=";
+        string yellow32 = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAFQWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjMyIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMzIiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSIzMiIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMzIiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249Ijk2LjAiCiAgIHRpZmY6WVJlc29sdXRpb249Ijk2LjAiCiAgIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiCiAgIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIKICAgeG1wOk1vZGlmeURhdGU9IjIwMjItMDgtMDNUMTE6MDEtMDQ6MDAiCiAgIHhtcDpNZXRhZGF0YURhdGU9IjIwMjItMDgtMDNUMTE6MDEtMDQ6MDAiPgogICA8ZGM6dGl0bGU+CiAgICA8cmRmOkFsdD4KICAgICA8cmRmOmxpIHhtbDpsYW5nPSJ4LWRlZmF1bHQiPkljb25zPC9yZGY6bGk+CiAgICA8L3JkZjpBbHQ+CiAgIDwvZGM6dGl0bGU+CiAgIDx4bXBNTTpIaXN0b3J5PgogICAgPHJkZjpTZXE+CiAgICAgPHJkZjpsaQogICAgICBzdEV2dDphY3Rpb249InByb2R1Y2VkIgogICAgICBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZmZpbml0eSBQaG90byAxLjkuMiIKICAgICAgc3RFdnQ6d2hlbj0iMjAyMi0wOC0wM1QxMTowMS0wNDowMCIvPgogICAgPC9yZGY6U2VxPgogICA8L3htcE1NOkhpc3Rvcnk+CiAgPC9yZGY6RGVzY3JpcHRpb24+CiA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSJyIj8+QlHHJAAAAYFpQ0NQc1JHQiBJRUM2MTk2Ni0yLjEAACiRdZG7SwNBEIe/JIriG7SwsAiiqRKJClEbiwSNglokEYzaJJeXkMdxF5FgK9gGFEQbX4X+BdoK1oKgKIJYirWijYZzLhEiYmaZnW9/uzPszoI1lFYyep0bMtm8FvB77QvhRXvDM43YaGMER0TR1dngZIia9nGHxYw3LrNW7XP/WnMsritgaRQeV1QtLzwlPLOWV03eFu5SUpGY8KmwU5MLCt+aerTCLyYnK/xlshYK+MDaIWxP/uLoL1ZSWkZYXk5fJr2q/NzHfElLPDsflNgr3oNOAD9e7EwzgQ8Pg4zJ7MHFEAOyoka+u5w/R05yFZlVCmiskCRFHqeoq1I9LjEhelxGmoLZ/7991RPDQ5XqLV6ofzKMt35o2IJS0TA+Dw2jdAS2R7jIVvNzBzD6LnqxqvXtQ/sGnF1WtegOnG9C94Ma0SJlySZuTSTg9QRaw9B5DU1LlZ797HN8D6F1+aor2N0Dh5xvX/4Gl2ln/HOw8/IAAAAJcEhZcwAADsQAAA7EAZUrDhsAAABESURBVEiJ7dYhEgAgEELRXfX+N3YwqMW8FOeTSLxKSgprrICkcVsvX8+cEdHKd58AAAAAAAAAAAD8Apxvun+kI+m+7wtioxA0Q8wTIgAAAABJRU5ErkJggg==";
 
         public ButtonClass(string name, string text, string className, System.Drawing.Bitmap largeImage,
             System.Drawing.Bitmap smallImage, string toolTip)
@@ -153,6 +159,7 @@ namespace RAB_Session_06_Challenge
             Data = new PushButtonData(name, text, GetAssemblyName(), className);
             Data.ToolTip = toolTip;
             Data.LargeImage = BitmapToImageSource(largeImage);
+            //Data.LargeImage = Base64ToImageSource(blue32);
             Data.Image = BitmapToImageSource(smallImage);
         }
 
@@ -174,6 +181,46 @@ namespace RAB_Session_06_Challenge
 
                 return bmi;
             }
+        }
+
+        private Bitmap Base64ToBitmap(string base64String)
+        {
+            Bitmap bmpReturn = null;
+            //Convert Base64 string to byte[]
+            byte[] byteBuffer = Convert.FromBase64String(base64String);
+            MemoryStream memoryStream = new MemoryStream(byteBuffer);
+
+            memoryStream.Position = 0;
+
+            bmpReturn = (Bitmap)Bitmap.FromStream(memoryStream);
+
+            memoryStream.Close();
+            memoryStream = null;
+            byteBuffer = null;
+
+            return bmpReturn;
+        }
+
+
+        private BitmapImage Base64ToImageSource(string base64String)
+        {
+            Bitmap bitmap = Base64ToBitmap(base64String);
+
+            IntPtr hBitmap = bitmap.GetHbitmap();
+            BitmapImage retval;
+
+            try
+            {
+                retval = (BitmapImage)Imaging.CreateBitmapSourceFromHBitmap(
+                             hBitmap,
+                             IntPtr.Zero,
+                             Int32Rect.Empty,
+                             BitmapSizeOptions.FromEmptyOptions());
+            }
+            finally
+            {}
+
+            return retval;
         }
     }
 }

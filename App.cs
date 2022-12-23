@@ -35,7 +35,7 @@ namespace RAB_Session_06_Challenge
             RibbonPanel panel = CreateRibbonPanel(app, "Revit Add-in Bootcamp", "Revit Tools");
 
             // 3. Create button data instances
-            PushButtonData data1 = new PushButtonData("Tool1", "Tool 1", assemblyName, "RAB_Session_06_Challenge.Command");
+            PushButtonData data1 = new PushButtonData("Tool1", "Tool 1", assemblyName, "SmartPack_2022.AdskCmdAlign");
             PushButtonData data2 = new PushButtonData("Tool2", "Tool 2", assemblyName, "RAB_Session_06_Challenge.Command");
             PushButtonData data3 = new PushButtonData("Tool3", "Tool 3", assemblyName, "RAB_Session_06_Challenge.Command");
             PushButtonData data4 = new PushButtonData("Tool4", "Tool 4", assemblyName, "RAB_Session_06_Challenge.Command");
